@@ -1,0 +1,136 @@
+/*
+  style.css - how the website looks
+  ---------------------------------
+  All colours are defined once, as variables, at the top. The second block
+  swaps them for dark colours when the visitor's computer is in dark mode.
+*/
+
+:root {
+  --bg: #f5f6f8;
+  --card: #ffffff;
+  --text: #1b1f24;
+  --muted: #5f6b7a;
+  --border: #e1e5ea;
+  --up: #0f9d58;          /* green: price up, Solid */
+  --up-bg: #e3f5ea;
+  --talk: #a86400;        /* amber: Just talk */
+  --talk-bg: #fdf0d9;
+  --down: #d93025;
+  --accent: #2563eb;
+  --ema10: #2563eb;       /* blue   */
+  --ema20: #e8710a;       /* orange */
+  --sma50: #9334e6;       /* purple */
+  --system: #0e7490;      /* teal: System */
+  --system-bg: #dcf3f8;
+  --bar-gray: #9aa3ad;    /* candles on System charts */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1216;
+    --card: #181c22;
+    --text: #e6e9ee;
+    --muted: #97a2b0;
+    --border: #2a3039;
+    --up: #34c77b;
+    --up-bg: #133222;
+    --talk: #f0b44c;
+    --talk-bg: #3a2b12;
+    --down: #ff6b5e;
+    --accent: #6ea0ff;
+    --ema10: #6ea0ff;
+    --ema20: #ffa24d;
+    --sma50: #c58af9;
+    --system: #5ccfe6;
+    --system-bg: #10313a;
+    --bar-gray: #6b737d;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Page width: full width on phones (16px edges), max 1200px on big screens */
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+
+/* ---- Header ---- */
+.top { background: var(--card); border-bottom: 1px solid var(--border); padding: 20px 0 16px; margin-bottom: 20px; }
+h1 { margin: 0; font-size: 26px; }
+.subtitle { margin: 2px 0 8px; color: var(--muted); }
+.status { margin: 0; font-size: 14px; }
+.status strong { font-weight: 600; }
+
+/* ---- Filter buttons ---- */
+.filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.filters button {
+  font: inherit; cursor: pointer;
+  padding: 6px 14px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--card); color: var(--text);
+}
+.filters button.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+/* ---- Cards: 1 column on phones, 2 columns on wide screens ---- */
+.cards { display: grid; gap: 16px; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .cards { grid-template-columns: 1fr 1fr; } }
+
+.card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 16px; min-width: 0;  /* min-width: 0 stops long text from stretching the grid */
+}
+
+.card-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.symbol { font-size: 22px; font-weight: 700; margin: 0; }
+.name { color: var(--muted); font-size: 13px; margin: 0; overflow-wrap: anywhere; }
+.price { text-align: right; white-space: nowrap; }
+.price .now { font-size: 20px; font-weight: 600; }
+.price .change { color: var(--up); font-weight: 600; }
+.price .change.neg { color: var(--down); }
+.price .vol { color: var(--muted); font-size: 12px; }
+
+/* ---- Label badge + AI reason ---- */
+.badge { display: inline-block; padding: 1px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.badge-solid { background: var(--up-bg); color: var(--up); }
+.badge-talk  { background: var(--talk-bg); color: var(--talk); }
+.badge-system { background: var(--system-bg); color: var(--system); }
+.reason { margin: 10px 0 12px; }
+.reason .badge { margin-right: 6px; }
+
+/* ---- Chart + its two buttons ---- */
+.chart-tabs { display: flex; gap: 6px; margin-bottom: 6px; }
+.chart-tabs button {
+  font: inherit; font-size: 13px; cursor: pointer;
+  padding: 3px 10px; border-radius: 6px;
+  border: 1px solid var(--border); background: transparent; color: var(--muted);
+}
+.chart-tabs button.active { color: var(--text); border-color: var(--text); }
+.chart { height: 260px; width: 100%; }
+
+/* Legend for the moving-average lines: a short coloured dash before each name
+   (app.js sets --dash to the line's colour) */
+.chart-tabs { flex-wrap: wrap; align-items: center; }
+.ma-legend { display: flex; gap: 10px; margin-left: auto; font-size: 12px; color: var(--muted); }
+.trend-dots::before {     /* a green and a red dot, like on the chart */
+  content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 10px; vertical-align: middle;
+  border-radius: 50%; background: var(--up); box-shadow: 7px 0 0 var(--down);
+}
+.ma::before { content: ""; display: inline-block; width: 14px; height: 2px; margin-right: 4px; vertical-align: middle; background: var(--dash); }
+.no-chart { color: var(--muted); font-size: 13px; }
+
+/* ---- Headlines ---- */
+.news { margin-top: 12px; font-size: 14px; }
+.news summary { cursor: pointer; color: var(--accent); }
+.news ul { margin: 8px 0 0; padding-left: 18px; }
+.news li { margin-bottom: 6px; overflow-wrap: anywhere; }
+.news a { color: var(--text); }
+.news .meta { color: var(--muted); font-size: 12px; }
+
+/* ---- Messages + footer ---- */
+.message { background: var(--card); border: 1px dashed var(--border); border-radius: 12px; padding: 24px; text-align: center; color: var(--muted); }
+.footer { color: var(--muted); font-size: 13px; padding-top: 24px; padding-bottom: 32px; }
+.footer .badge { vertical-align: 1px; }

@@ -1,0 +1,22 @@
+# Secret keys - never upload
+.env
+
+# Python junk
+__pycache__/
+*.pyc
+venv/
+.venv/
+.vscode/
+# AI answers cache (rebuilt automatically)
+judge_cache.json
+
+# Lambda build + Terraform (state files contain your keys!)
+build/
+infra/.terraform/
+infra/*.tfstate
+infra/*.tfstate.*
+infra/tfplan
+
+# Data made by the scripts / Lambdas (changes every 20 min)
+results.json
+system.json

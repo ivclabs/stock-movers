@@ -1,0 +1,61 @@
+<!doctype html>
+<!--
+  index.html - Phase 5: the website
+  ---------------------------------
+  Only the "skeleton" of the page lives here. app.js reads results.json and
+  fills in one card per stock.
+
+      browser ──loads──▶ index.html ──▶ style.css   (how it looks)
+                                    ──▶ lightweight-charts (chart library, from a CDN)
+                                    ──▶ app.js ──fetch──▶ results.json (today's movers)
+                                                       ──▶ system.json  (yesterday's System scan)
+
+  Test locally (inside the project folder):
+      python -m http.server 8000      then open http://localhost:8000
+  (Opening index.html directly as a file does NOT work: browsers block
+   fetch() of local files, so we need a tiny web server.)
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stock Movers</title>
+  <meta name="description" content="US stocks moving up in pre-market and after-hours, with news checked by AI.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <h1>Stock Movers</h1>
+      <p class="subtitle">US stocks moving up outside regular hours with news, plus yesterday's System signals.</p>
+      <!-- app.js fills in: session, data time, counts -->
+      <p id="status" class="status">Loading…</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- Filter buttons: show all, or only Solid / Just talk / System -->
+    <nav class="filters" id="filters" hidden>
+      <button type="button" data-filter="all" class="active">All</button>
+      <button type="button" data-filter="Solid">Solid</button>
+      <button type="button" data-filter="Just talk">Just talk</button>
+      <button type="button" data-filter="System">System</button>
+    </nav>
+
+    <!-- One card per stock goes in here -->
+    <section id="cards" class="cards"></section>
+  </main>
+
+  <footer class="wrap footer">
+    <p><span class="badge badge-solid">Solid</span> = confirmed company news (earnings, FDA approval, signed deal).
+       <span class="badge badge-talk">Just talk</span> = company comments or plans, nothing confirmed yet.
+       <span class="badge badge-system">System</span> = first green 3-bar signal after a red one on yesterday's daily candle, with EMA10 &lt; EMA20 and both above SMA50.</p>
+    <p>Prices are 15 minutes delayed (Alpaca). News from Benzinga. Labels are made by AI and can be wrong.
+       <strong>Not financial advice.</strong></p>
+  </footer>
+
+  <!-- Chart library (pinned version, so an update can never break the site) -->
+  <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
