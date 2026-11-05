@@ -29,6 +29,6 @@ PIP=".venv/bin/pip"
     --quiet
 
 # Only the scripts Lambda needs (no test files, no .env!)
-cp movers.py news.py judge.py charts.py system.py lambda_function.py build/package/
+cp movers.py news.py judge.py charts.py lambda_function.py build/package/
 
 echo "Built build/package ($(du -sh build/package | cut -f1))"

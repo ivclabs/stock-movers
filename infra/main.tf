@@ -3,8 +3,7 @@
 # =============================================================================
 #
 #   EventBridge Scheduler ──▶ Lambda "pipeline" (every 20 min, pre/after-hours)
-#                        └──▶ Lambda "system"   (once a day, at night)
-#                                   │ write results.json / system.json
+#                                   │ writes results.json
 #                                   ▼
 #                              S3 bucket (private) ◀── index.html, style.css, app.js
 #                                   │ read only by CloudFront
@@ -60,7 +59,7 @@ resource "aws_s3_bucket_public_access_block" "site" {
 }
 
 # The 3 website files. Terraform re-uploads a file when it changes (etag = fingerprint).
-# results.json and system.json are NOT here: the Lambdas write those.
+# results.json is NOT here: the Lambda writes it.
 locals {
   site_files = {
     "index.html" = "text/html; charset=utf-8"
@@ -153,7 +152,7 @@ resource "aws_s3_bucket_policy" "site" {
 }
 
 # -----------------------------------------------------------------------------
-# 3. Lambda functions: run our Python scripts
+# 3. Lambda function: runs our Python scripts
 # -----------------------------------------------------------------------------
 # Zip of build/package (made by ../build_lambda.sh)
 data "archive_file" "lambda" {
@@ -208,11 +207,6 @@ resource "aws_cloudwatch_log_group" "pipeline" {
   retention_in_days = 14
 }
 
-resource "aws_cloudwatch_log_group" "system" {
-  name              = "/aws/lambda/${local.name}-system"
-  retention_in_days = 14
-}
-
 resource "aws_lambda_function" "pipeline" {
   function_name    = "${local.name}-pipeline"
   description      = "movers -> news -> judge -> charts, writes results.json"
@@ -237,31 +231,8 @@ resource "aws_lambda_function" "pipeline" {
   depends_on = [aws_cloudwatch_log_group.pipeline, aws_iam_role_policy_attachment.lambda_logs]
 }
 
-resource "aws_lambda_function" "system" {
-  function_name    = "${local.name}-system"
-  description      = "Daily System scan of the whole market, writes system.json"
-  role             = aws_iam_role.lambda.arn
-  runtime          = "python3.13"
-  architectures    = ["x86_64"]
-  handler          = "lambda_function.system_handler"
-  filename         = data.archive_file.lambda.output_path
-  source_code_hash = data.archive_file.lambda.output_base64sha256
-  timeout          = 900  # the maximum (15 min); the scan takes ~3 min
-  memory_size      = 2048 # it holds ~7,000 stocks x 170 candles in memory
-
-  environment {
-    variables = {
-      BUCKET      = aws_s3_bucket.site.id
-      APCA_KEY_ID = var.apca_key_id
-      APCA_SECRET = var.apca_secret
-    }
-  }
-
-  depends_on = [aws_cloudwatch_log_group.system, aws_iam_role_policy_attachment.lambda_logs]
-}
-
 # -----------------------------------------------------------------------------
-# 4. EventBridge Scheduler: starts the Lambdas on time
+# 4. EventBridge Scheduler: starts the Lambda on time
 # -----------------------------------------------------------------------------
 # Times are US market time (America/New_York), so summer/winter time is handled.
 # cron(minutes hours day-of-month month day-of-week year)
@@ -276,11 +247,6 @@ locals {
       cron        = "cron(0/20 16-19 ? * MON-FRI *)" # 16:00, 16:20 ... 19:40 (the code skips 16:00)
       function    = aws_lambda_function.pipeline.arn
       description = "After-hours movers, every 20 min"
-    }
-    system = {
-      cron        = "cron(0 2 ? * TUE-SAT *)" # 02:00 the night after each trading day
-      function    = aws_lambda_function.system.arn
-      description = "Daily System scan of yesterday's candles"
     }
   }
 }
@@ -300,11 +266,11 @@ resource "aws_iam_role" "scheduler" {
   assume_role_policy = data.aws_iam_policy_document.scheduler_assume.json
 }
 
-# The scheduler may start our 2 Lambdas, nothing else
+# The scheduler may start our Lambda, nothing else
 data "aws_iam_policy_document" "scheduler_invoke" {
   statement {
     actions   = ["lambda:InvokeFunction"]
-    resources = [aws_lambda_function.pipeline.arn, aws_lambda_function.system.arn]
+    resources = [aws_lambda_function.pipeline.arn]
   }
 }
 

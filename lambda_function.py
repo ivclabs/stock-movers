@@ -8,14 +8,11 @@ This file only adds what is different in the cloud:
   * Files must survive between runs, so they live in S3 instead of your disk.
   * Keys come from Lambda environment variables instead of .env.
 
-Two entry points ("handlers"), one per Lambda function:
+Entry point ("handler") of the Lambda function:
 
   pipeline_handler  every 20 min in pre-market / after-hours
       S3 judge_cache.json ─▶ /tmp ─▶ movers → news → judge → charts
                                           └──▶ S3: results.json + judge_cache.json
-
-  system_handler    once a day, at night (US time)
-      system.py ──▶ S3: system.json
 
 If a step fails, nothing is uploaded: the website keeps showing the last good data.
 """
@@ -30,7 +27,6 @@ import movers
 import news
 import judge
 import charts
-import system
 
 BUCKET = os.environ.get("BUCKET", "")
 WORK_DIR = "/tmp"
@@ -105,10 +101,3 @@ def pipeline_handler(event, context):
     upload(judge.CACHE_FILE, cache_seconds=0)
     return {"ok": True, "session": session}
 
-
-def system_handler(event, context):
-    """Yesterday's System scan, then upload system.json."""
-    os.chdir(WORK_DIR)
-    run_step("system", system.main)
-    upload(system.SYSTEM_FILE, cache_seconds=300)
-    return {"ok": True}

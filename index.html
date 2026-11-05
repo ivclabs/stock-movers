@@ -8,7 +8,6 @@
       browser ──loads──▶ index.html ──▶ style.css   (how it looks)
                                     ──▶ lightweight-charts (chart library, from a CDN)
                                     ──▶ app.js ──fetch──▶ results.json (today's movers)
-                                                       ──▶ system.json  (yesterday's System scan)
 
   Test locally (inside the project folder):
       python -m http.server 8000      then open http://localhost:8000
@@ -27,19 +26,18 @@
   <header class="top">
     <div class="wrap">
       <h1>Stock Movers</h1>
-      <p class="subtitle">US stocks moving up outside regular hours with news, plus yesterday's System signals.</p>
+      <p class="subtitle">US stocks moving up outside regular hours, with news checked by AI.</p>
       <!-- app.js fills in: session, data time, counts -->
       <p id="status" class="status">Loading…</p>
     </div>
   </header>
 
   <main class="wrap">
-    <!-- Filter buttons: show all, or only Solid / Just talk / System -->
+    <!-- Filter buttons: show all, or only Solid / Just talk -->
     <nav class="filters" id="filters" hidden>
       <button type="button" data-filter="all" class="active">All</button>
       <button type="button" data-filter="Solid">Solid</button>
       <button type="button" data-filter="Just talk">Just talk</button>
-      <button type="button" data-filter="System">System</button>
     </nav>
 
     <!-- One card per stock goes in here -->
@@ -48,8 +46,7 @@
 
   <footer class="wrap footer">
     <p><span class="badge badge-solid">Solid</span> = confirmed company news (earnings, FDA approval, signed deal).
-       <span class="badge badge-talk">Just talk</span> = company comments or plans, nothing confirmed yet.
-       <span class="badge badge-system">System</span> = first green 3-bar signal after a red one on yesterday's daily candle, with EMA10 &lt; EMA20 and both above SMA50.</p>
+       <span class="badge badge-talk">Just talk</span> = company comments or plans, nothing confirmed yet.</p>
     <p>Prices are 15 minutes delayed (Alpaca). News from Benzinga. Labels are made by AI and can be wrong.
        <strong>Not financial advice.</strong></p>
   </footer>

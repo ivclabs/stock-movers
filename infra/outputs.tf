@@ -12,7 +12,3 @@ output "bucket" {
 output "pipeline_function" {
   value = aws_lambda_function.pipeline.function_name
 }
-
-output "system_function" {
-  value = aws_lambda_function.system.function_name
-}
