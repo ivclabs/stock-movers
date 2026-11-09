@@ -1,6 +1,8 @@
 # Stock Movers
 
-**Live site: https://d1p6aa3eour1bj.cloudfront.net**
+> **Status: project closed (2026-11-09).** The AWS deployment has been shut down with
+> `terraform destroy`, so the live site is no longer online. The code is kept here for
+> reference and can be redeployed with `./deploy.sh` (it will get a new URL).
 
 A website that shows US stocks moving **up** in pre-market and after-hours trading,
 but only the ones with real news behind the move. An AI (Claude Haiku) reads the
